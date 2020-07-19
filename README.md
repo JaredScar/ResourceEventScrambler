@@ -25,16 +25,22 @@ on accident. This is why I recommend backing it up yourself just in case.
 
 1. Unzip the `.zip` into your `fx-server-data` folder (otherwise known as the directory/folder that 
 holds your `server.cfg` file)
-2. Copy your `resources` folder and paste it to make a backup
+2. Copy your `resources` folder (the resources folder that has never been scrambled) 
+and paste it to make a backup
 3. Run the `resourceScramble.bat` to start scrambling your resources
 4. Place `RES_Anticheat` in the `resources` folder and start it in your `server.cfg`
 5. You are done! Your resources should now be properly scrambled just like eggs, but just no taste...
+
+## RES_Anticheat
+After you have ran the scrambler, you will now have a brand new Anticheat to catch people trying to 
+mod by triggering the events before you scrambled them. Move the `RES_Anticheat` directory into the 
+now scrambled `resources` folder
 
 ## How do I add resources?
 **After you have scrambled your resources, you can't add new resources to the `resources` directory anymore.**
 
 You will need to add the resources to a backed up `resources` folder, then scramble this folder.
-Repeat steps 2-4 again in this case.
+Repeat steps 1-4 again in this case.
 
 ## Download
 **Source Code (Java):**
