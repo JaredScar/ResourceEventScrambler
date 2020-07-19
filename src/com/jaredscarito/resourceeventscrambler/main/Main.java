@@ -214,6 +214,22 @@ public class Main {
             }
         }
 
+        // Let's add the old events to events.lua now
+        try {
+            String content = "Events = {\n";
+            for (String eventName : keyVals.keySet()) {
+                content = content + "'" + eventName + "',\n";
+            }
+            content = content + "}";
+            FileOutputStream fooStream = new FileOutputStream(new File("RES_Anticheat/events.lua"), false); // true to append
+            // false to overwrite.
+            byte[] bytes = content.getBytes();
+            fooStream.write(bytes);
+            fooStream.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
         System.out.println("[ResourceEventScrambler] SCRAMBLING COMPLETED");
     }
     public static boolean alreadyExists(String val) {
