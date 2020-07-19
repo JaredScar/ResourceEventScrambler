@@ -27,7 +27,8 @@ on accident. This is why I recommend backing it up yourself just in case.
 holds your `server.cfg` file)
 2. Copy your `resources` folder and paste it to make a backup
 3. Run the `resourceScramble.bat` to start scrambling your resources
-4. You are done! Your resources should now be properly scrambled just like eggs, but just no taste...
+4. Place `RES_Anticheat` in the `resources` folder and start it in your `server.cfg`
+5. You are done! Your resources should now be properly scrambled just like eggs, but just no taste...
 
 ## How do I add resources?
 **After you have scrambled your resources, you can't add new resources to the `resources` directory anymore.**
