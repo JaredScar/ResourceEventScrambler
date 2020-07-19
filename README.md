@@ -35,4 +35,14 @@ holds your `server.cfg` file)
 You will need to add the resources to a backed up `resources` folder, then scramble this folder.
 Repeat steps 2-4 again in this case.
 
+## Download
+**Source Code (Java):**
+
+https://github.com/JaredScar/ResourceEventScrambler
+
+**Built (with `.bat` executable):**
+
+https://github.com/JaredScar/ResourceEventScrambler/releases
+
+
 
