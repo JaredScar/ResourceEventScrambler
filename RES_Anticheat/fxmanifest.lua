@@ -1,4 +1,7 @@
-resource_manifest_version '44febabe-d386-4d18-afbe-5e627f4af937'
+fx_version 'bodacious'
+game 'gta5'
+
+description 'RES_Anticheat'
 
 server_script "config.lua"
 server_script "events.lua"
