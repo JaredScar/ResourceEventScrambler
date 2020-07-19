@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" build-on-make="true" name="ResourceEventScrambler:jar">
+    <output-path>D:/Fivem-Server/fx-server-data</output-path>
+    <root id="archive" name="ResourceEventScrambler.jar">
+      <element id="module-output" name="ResourceEventScrambler" />
+    </root>
+  </artifact>
+</component>
