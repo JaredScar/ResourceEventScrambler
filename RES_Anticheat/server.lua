@@ -16,7 +16,7 @@ function UnbanPlayer(ip)
     SaveResourceFile(GetCurrentResourceName(), "banlist.json", json.encode(cfg, { indent = true }), -1)
 end
 function GetBans()
-    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local config = LoadResourceFile(GetCurrentResourceName(), "banlist.json")
     local cfg = json.decode(config)
     return cfg;
 end
