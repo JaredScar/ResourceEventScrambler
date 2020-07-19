@@ -16,7 +16,7 @@ function UnbanPlayer(ip)
     SaveResourceFile(GetCurrentResourceName(), "banlist.json", json.encode(cfg, { indent = true }), -1)
 end
 function GetBans()
-    local config = LoadResourceFile(GetCurrentResourceName(), "ac-bans.json")
+    local config = LoadResourceFile(GetCurrentResourceName(), "banlist.json")
     local cfg = json.decode(config)
     return cfg;
 end
@@ -100,4 +100,37 @@ function sendToDisc(title, message, footer)
     PerformHttpRequest(webhookURL,
     function(err, text, headers) end, 'POST', json.encode({username = name, embeds = embed}), { ['Content-Type'] = 'application/json' })
   -- END
+end
+
+function ExtractIdentifiers(src)
+    local identifiers = {
+        steam = "",
+        ip = "",
+        discord = "",
+        license = "",
+        xbl = "",
+        live = ""
+    }
+
+    --Loop over all identifiers
+    for i = 0, GetNumPlayerIdentifiers(src) - 1 do
+        local id = GetPlayerIdentifier(src, i)
+
+        --Convert it to a nice table.
+        if string.find(id, "steam") then
+            identifiers.steam = id
+        elseif string.find(id, "ip") then
+            identifiers.ip = id
+        elseif string.find(id, "discord") then
+            identifiers.discord = id
+        elseif string.find(id, "license") then
+            identifiers.license = id
+        elseif string.find(id, "xbl") then
+            identifiers.xbl = id
+        elseif string.find(id, "live") then
+            identifiers.live = id
+        end
+    end
+
+    return identifiers
 end
