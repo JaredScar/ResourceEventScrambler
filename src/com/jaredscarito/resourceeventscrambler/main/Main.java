@@ -148,11 +148,14 @@ public class Main {
                                     String newEventName = getRandomEventScramble();
                                     if (!isFivemEvent(eventName) && !alreadyExists(eventName)) {
                                         if (!keyVals.containsKey(eventName)) {
-                                            content = content.replaceAll(eventName, newEventName);
+                                            content = content.replaceAll("'" + eventName + "'", "'" + newEventName + "'");
+                                            content = content.replaceAll("\"" + eventName + "\"", "\"" + newEventName + "\"");
                                             keyVals.put(eventName, newEventName);
                                             System.out.println("[ResourceEventScrambler] Replaced event named '" + eventName + "' with: " + newEventName);
                                         } else {
-                                            content = content.replaceAll(eventName, keyVals.get(eventName));
+                                            newEventName = keyVals.get(eventName);
+                                            content = content.replaceAll("'" + eventName + "'", "'" + newEventName + "'");
+                                            content = content.replaceAll("\"" + eventName + "\"", "\"" + newEventName + "\"");
                                             System.out.println("[ResourceEventScrambler] Replaced event named '" + eventName + "' with: " + keyVals.get(eventName));
                                         }
                                     }
@@ -194,7 +197,8 @@ public class Main {
 
                         String content = stringBuilder.toString();
                         for (String eventKey : keyVals.keySet()) {
-                            content = content.replaceAll(eventKey, keyVals.get(eventKey));
+                            content = content.replaceAll("'" + eventKey + "'", "'" + keyVals.get(eventKey) + "'");
+                            content = content.replaceAll("\"" + eventKey + "\"", "\"" + keyVals.get(eventKey) + "\"");
                         }
                         File file = f.getAbsoluteFile();
                         FileOutputStream fooStream = new FileOutputStream(file, false); // true to append
