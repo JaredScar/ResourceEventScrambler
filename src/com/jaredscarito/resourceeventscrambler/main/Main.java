@@ -197,8 +197,8 @@ public class Main {
 
                         String content = stringBuilder.toString();
                         for (String eventKey : keyVals.keySet()) {
-                            content = content.replaceAll("^['" + eventKey + "'", "'" + keyVals.get(eventKey) + "'");
-                            content = content.replaceAll("^[\"" + eventKey + "\"", "\"" + keyVals.get(eventKey) + "\"");
+                            content = content.replaceAll("[^[]'" + eventKey + "'", "'" + keyVals.get(eventKey) + "'");
+                            content = content.replaceAll("[^[]\"" + eventKey + "\"", "\"" + keyVals.get(eventKey) + "\"");
                         }
                         File file = f.getAbsoluteFile();
                         FileOutputStream fooStream = new FileOutputStream(file, false); // true to append
