@@ -32,9 +32,10 @@ on accident. This is why I recommend backing it up yourself just in case.
 holds your `server.cfg` file)
 2. Copy your `resources` folder (the resources folder that has never been scrambled) 
 and paste it to make a backup
-3. Run the `resourceScramble.bat` to start scrambling your resources
-4. Place `RES_Anticheat` in the `resources` folder and start it in your `server.cfg`
-5. You are done! Your resources should now be properly scrambled just like eggs, but just no taste...
+3. Edit the `config` file to your liking
+4. Run the `resourceScramble.bat` to start scrambling your resources
+5. Place `RES_Anticheat` in the `resources` folder and start it in your `server.cfg`
+6. You are done! Your resources should now be properly scrambled just like eggs, but just no taste...
 
 ## RES_Anticheat
 After you have ran the scrambler, you will now have a brand new Anticheat to catch people trying to 
