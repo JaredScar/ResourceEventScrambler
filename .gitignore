@@ -1,0 +1,13 @@
+# Compiled output
+out/
+*.class
+
+# Local IntelliJ state
+.idea/workspace.xml
+.idea/shelf/
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/dictionaries/
+.idea/httpRequests/
+.idea/dataSources/
+.idea/dataSources.local.xml
