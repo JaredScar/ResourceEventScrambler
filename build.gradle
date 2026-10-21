@@ -1,0 +1,48 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.1.0'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+javafx {
+    version = '21.0.6'
+    modules = [ 'javafx.controls' ]
+}
+
+application {
+    mainClass = 'com.jaredscarito.resourceeventscrambler.main.Main'
+}
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src']
+        }
+        resources {
+            srcDirs = ['src']
+            include '**/*.css'
+        }
+    }
+    test {
+        java {
+            srcDirs = ['test']
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+tasks.register('scrambleSelfTest', JavaExec) {
+    group = 'verification'
+    description = 'Runs the scrambler against temporary resources.'
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'com.jaredscarito.resourceeventscrambler.main.ScrambleSelfTest'
+    dependsOn tasks.named('testClasses')
+}

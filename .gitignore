@@ -1,6 +1,10 @@
 # Compiled output
 out/
+build/
 *.class
+
+# Gradle
+.gradle/
 
 # Local IntelliJ state
 .idea/workspace.xml

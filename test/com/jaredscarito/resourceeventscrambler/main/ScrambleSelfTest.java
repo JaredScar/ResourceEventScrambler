@@ -212,6 +212,36 @@ public class ScrambleSelfTest {
 			check(expected.getMessage().toLowerCase().contains("backup"), expected.getMessage());
 		}
 		check(read(resources.resolve("demo").resolve("client.lua")).equals(afterFirst), "second run modified a file");
+
+		Path map = root.resolve("event-map.txt");
+		check(Files.exists(map), "event map was not written");
+		String mapText = read(map);
+		check(mapText.contains("esx:getData\t" + mapping.get("esx:getData") + "\t"), "event map missing esx:getData: " + mapText);
+		check(mapText.contains("close\t" + mapping.get("close") + "\t1"), "event map missing nui close: " + mapText);
+
+		ResourceScrambler.Outcome restored = ResourceScrambler.unscramble(resources, config, events);
+		String clientAgain = read(resources.resolve("demo").resolve("client.lua"));
+		check(clientAgain.contains("TriggerEvent(\"esx:getData\")"), "esx:getData was not restored: " + clientAgain);
+		check(clientAgain.contains("TriggerEvent(\"" + "esx" + "\")") || clientAgain.contains("TriggerEvent(\"esx\")"), "esx was not restored");
+		check(clientAgain.contains("esx:getData should stay"), "sentence changed during unscramble");
+		check(clientAgain.contains("prefix-esx-suffix"), "short token changed during unscramble");
+		check(clientAgain.contains("game stays in this string"), "game sentence changed during unscramble");
+		check(clientAgain.contains("TriggerEvent(\"playerConnecting\")"), "blacklisted event changed during unscramble");
+		check(clientAgain.contains("\"long:event\""), "long event was not restored: " + clientAgain);
+		check(!clientAgain.contains(mapping.get("esx:getData")), "scrambled esx:getData remained");
+		check(read(resources.resolve("demo").resolve("fxmanifest.lua")).equals(manifest), "fxmanifest changed during unscramble");
+		check(read(resources.resolve("chat").resolve("client.lua")).equals(chat), "blacklisted resource changed during unscramble");
+		String appAgain = read(resources.resolve("demo").resolve("html").resolve("app.js"));
+		check(appAgain.contains("/closeMenu"), "closeMenu url was not restored: " + appAgain);
+		check(appAgain.contains("/close"), "close url was not restored: " + appAgain);
+		check(appAgain.contains("img/close.png"), "image path changed during unscramble");
+		check(!appAgain.contains("/" + mapping.get("closeMenu")), "scrambled closeMenu url remained");
+		String eventsAgain = read(events);
+		check(!eventsAgain.contains("'esx:getData'"), "anticheat list still has restored events: " + eventsAgain);
+		check(restored.filesChanged >= 6, "expected files to be restored, got " + restored.filesChanged);
+		byte[] latinAgain = Files.readAllBytes(resources.resolve("demo").resolve("latin.lua"));
+		check(indexOf(latinAgain, (byte) 0xE9) >= 0, "latin-1 byte lost during unscramble");
+		check(new String(latinAgain, java.nio.charset.StandardCharsets.ISO_8859_1).contains("latin:event"), "latin event was not restored");
 	}
 
 	private static void testMissingResources(Path root) throws Exception {

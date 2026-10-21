@@ -1,11 +1,11 @@
 package com.jaredscarito.resourceeventscrambler.main;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -30,47 +30,85 @@ final class ScramblerConfig {
 			System.out.println("[ResourceEventScrambler] No config detected. Creating " + configPath.toAbsolutePath());
 			writeDefault(configPath);
 		}
+		return parse(Files.readAllLines(configPath, StandardCharsets.UTF_8));
+	}
 
+	static ScramblerConfig defaultConfig() {
+		return parse(Arrays.asList(DEFAULT_LINES));
+	}
+
+	static void save(Path configPath, Iterable<String> resources, Iterable<String> events, Iterable<String> files) throws IOException {
+		List<String> lines = new ArrayList<String>();
+		lines.add("#Add More Lines as needed.");
+		lines.add("Blacklisted Resources:");
+		lines.add("# (These Resources will NOT be modified by the scrambler)");
+		for (String resource : resources) {
+			String trimmed = resource.trim();
+			if (!trimmed.isEmpty() && !trimmed.startsWith("#")) {
+				lines.add(trimmed);
+			}
+		}
+		lines.add("");
+		lines.add("Blacklisted Events:");
+		for (String event : events) {
+			String trimmed = event.trim();
+			if (!trimmed.isEmpty() && !trimmed.startsWith("#")) {
+				lines.add(trimmed);
+			}
+		}
+		lines.add("");
+		lines.add("Blacklisted Files:");
+		lines.add("# These files will not be modified. Use the path relative to the resources folder, without a leading slash.");
+		for (String file : files) {
+			String trimmed = file.trim();
+			if (!trimmed.isEmpty() && !trimmed.startsWith("#")) {
+				lines.add(normalizeRelative(trimmed));
+			}
+		}
+		lines.add("");
+		Path parent = configPath.getParent();
+		if (parent != null) {
+			Files.createDirectories(parent);
+		}
+		Files.write(configPath, String.join("\n", lines).getBytes(StandardCharsets.UTF_8));
+	}
+
+	private static ScramblerConfig parse(List<String> sourceLines) {
 		Set<String> resources = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
 		Set<String> events = new HashSet<String>();
 		List<String> files = new ArrayList<String>();
 		int section = -1;
-
-		try (BufferedReader reader = Files.newBufferedReader(configPath, StandardCharsets.UTF_8)) {
-			String line;
-			while ((line = reader.readLine()) != null) {
-				String trimmed = line.trim();
-				if (trimmed.isEmpty() || trimmed.startsWith("#")) {
-					continue;
-				}
-				if (trimmed.equals("Blacklisted Resources:")) {
-					section = 0;
-					continue;
-				}
-				if (trimmed.equals("Blacklisted Events:")) {
-					section = 1;
-					continue;
-				}
-				if (trimmed.equals("Blacklisted Files:")) {
-					section = 2;
-					continue;
-				}
-				switch (section) {
-					case 0:
-						resources.add(trimmed);
-						break;
-					case 1:
-						events.add(trimmed);
-						break;
-					case 2:
-						files.add(normalizeRelative(trimmed));
-						break;
-					default:
-						break;
-				}
+		for (String line : sourceLines) {
+			String trimmed = line.trim();
+			if (trimmed.isEmpty() || trimmed.startsWith("#")) {
+				continue;
+			}
+			if (trimmed.equals("Blacklisted Resources:")) {
+				section = 0;
+				continue;
+			}
+			if (trimmed.equals("Blacklisted Events:")) {
+				section = 1;
+				continue;
+			}
+			if (trimmed.equals("Blacklisted Files:")) {
+				section = 2;
+				continue;
+			}
+			switch (section) {
+				case 0:
+					resources.add(trimmed);
+					break;
+				case 1:
+					events.add(trimmed);
+					break;
+				case 2:
+					files.add(normalizeRelative(trimmed));
+					break;
+				default:
+					break;
 			}
 		}
-
 		resources.add(ALWAYS_SKIPPED_RESOURCE);
 		return new ScramblerConfig(
 				Collections.unmodifiableSet(resources),

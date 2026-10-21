@@ -95,11 +95,26 @@ public final class ResourceScrambler {
 	private ResourceScrambler() {
 	}
 
+	public static Path backupDirectory(Path resourcesDir) {
+		Path resources = resourcesDir.toAbsolutePath().normalize();
+		return resources.resolveSibling(resources.getFileName().toString() + " [UNSCRAMBLED]");
+	}
+
+	public static Path eventMapFile(Path resourcesDir) {
+		Path resources = resourcesDir.toAbsolutePath().normalize();
+		return resources.resolveSibling("event-map.txt");
+	}
+
 	public static Outcome run(Path resourcesDir, Path configPath, Path eventsFile) throws IOException, ScrambleException {
+		return run(resourcesDir, configPath, eventsFile, eventMapFile(resourcesDir));
+	}
+
+	public static Outcome run(Path resourcesDir, Path configPath, Path eventsFile, Path mapFile) throws IOException, ScrambleException {
 		System.out.println("[ResourceEventScrambler] Running Scrambler");
 		Path resources = resourcesDir.toAbsolutePath().normalize();
 		Path config = configPath.toAbsolutePath().normalize();
 		Path events = eventsFile.toAbsolutePath().normalize();
+		Path eventMap = mapFile.toAbsolutePath().normalize();
 
 		ScramblerConfig loaded = ScramblerConfig.load(config);
 		if (!Files.isDirectory(resources)) {
@@ -107,7 +122,7 @@ public final class ResourceScrambler {
 					+ "'. Run this from the folder that contains server.cfg and resources.");
 		}
 
-		Path backup = resources.resolveSibling(resources.getFileName().toString() + " [UNSCRAMBLED]");
+		Path backup = backupDirectory(resources);
 		if (Files.exists(backup)) {
 			throw new ScrambleException("A backup already exists at '" + backup + "'. "
 					+ "Refusing to scramble again, because a second run would rename events that are already scrambled "
@@ -115,7 +130,7 @@ public final class ResourceScrambler {
 					+ "', add any new resources, delete the backup folder, then run the scrambler again.");
 		}
 
-		Scan scan = scan(resources, events, loaded);
+		Scan scan = scan(resources, events, loaded, false);
 		assignNames(scan);
 
 		try {
@@ -131,6 +146,7 @@ public final class ResourceScrambler {
 		try {
 			filesChanged = apply(scan);
 			writeEvents(events, scan.watched);
+			EventMap.write(eventMap, scan.mapping, scan.nuiNames);
 		} catch (IOException | RuntimeException e) {
 			throw new ScrambleException("Scrambling failed after the backup was created at '" + backup
 					+ "'. Restore that folder before trying again. " + e, e);
@@ -142,13 +158,73 @@ public final class ResourceScrambler {
 			System.out.println("[ResourceEventScrambler] '" + original + "' -> '" + scan.mapping.get(original) + "'");
 		}
 		System.out.println("[ResourceEventScrambler] Wrote anticheat event list (" + scan.watched.size() + " events)");
+		System.out.println("[ResourceEventScrambler] Wrote event map: " + eventMap);
 		System.out.println("[ResourceEventScrambler] SCRAMBLING COMPLETED (" + scan.mapping.size()
 				+ " unique names, " + filesChanged + " files)");
 		return new Outcome(filesChanged, scan.mapping, scan.watched);
 	}
 
-	private static Scan scan(Path resources, Path eventsFile, ScramblerConfig config) throws IOException, ScrambleException {
+	public static Outcome unscramble(Path resourcesDir, Path configPath, Path eventsFile) throws IOException, ScrambleException {
+		return unscramble(resourcesDir, configPath, eventsFile, eventMapFile(resourcesDir));
+	}
+
+	public static Outcome unscramble(Path resourcesDir, Path configPath, Path eventsFile, Path mapFile) throws IOException, ScrambleException {
+		System.out.println("[ResourceEventScrambler] Running unscrambler");
+		Path resources = resourcesDir.toAbsolutePath().normalize();
+		Path config = configPath.toAbsolutePath().normalize();
+		Path events = eventsFile.toAbsolutePath().normalize();
+		Path eventMap = mapFile.toAbsolutePath().normalize();
+		if (!Files.isDirectory(resources)) {
+			throw new ScrambleException("Could not find the resources folder at '" + resources + "'.");
+		}
+		if (!Files.isRegularFile(eventMap)) {
+			throw new ScrambleException("Could not find the event map at '" + eventMap
+					+ "'. Scramble this resources folder first, and keep that map file.");
+		}
+		EventMap map = EventMap.read(eventMap);
+		if (map.originalToScrambled.isEmpty()) {
+			throw new ScrambleException("The event map at '" + eventMap + "' does not contain any names.");
+		}
+		ScramblerConfig loaded = ScramblerConfig.load(config);
+		Scan scan = new Scan(loaded);
+		scan.reversing = true;
+		scan.mapping.putAll(map.scrambledToOriginal());
+		scan.nuiNames.addAll(map.scrambledNuiNames());
+		walk(resources, events, scan);
+
+		int filesChanged = 0;
+		try {
+			filesChanged = apply(scan);
+			if (filesChanged > 0) {
+				writeEvents(events, Collections.<String>emptySet());
+			}
+		} catch (IOException | RuntimeException e) {
+			throw new ScrambleException("Unscrambling failed. The clean backup is still at '"
+					+ backupDirectory(resources) + "'. " + e, e);
+		}
+
+		List<String> scrambledNames = new ArrayList<String>(scan.mapping.keySet());
+		Collections.sort(scrambledNames);
+		for (String scrambled : scrambledNames) {
+			System.out.println("[ResourceEventScrambler] '" + scrambled + "' -> '" + scan.mapping.get(scrambled) + "'");
+		}
+		System.out.println("[ResourceEventScrambler] UNSCRAMBLING COMPLETED (" + scan.mapping.size()
+				+ " names, " + filesChanged + " files)");
+		return new Outcome(filesChanged, scan.mapping, Collections.<String>emptySet());
+	}
+
+	private static Scan scan(Path resources, Path eventsFile, ScramblerConfig config, boolean reversing) throws IOException, ScrambleException {
 		Scan scan = new Scan(config);
+		scan.reversing = reversing;
+		collect(resources, eventsFile, scan);
+		return scan;
+	}
+
+	private static void walk(Path resources, Path eventsFile, Scan scan) throws IOException, ScrambleException {
+		collect(resources, eventsFile, scan);
+	}
+
+	private static void collect(Path resources, Path eventsFile, Scan scan) throws IOException, ScrambleException {
 		final IOException[] failure = new IOException[1];
 		final ScrambleException[] rejected = new ScrambleException[1];
 
@@ -162,7 +238,7 @@ public final class ResourceScrambler {
 				if (SKIPPED_DIRECTORIES.contains(name.toLowerCase(Locale.ROOT))) {
 					return FileVisitResult.SKIP_SUBTREE;
 				}
-				if (config.isBlacklistedResource(name)) {
+				if (scan.config.isBlacklistedResource(name)) {
 					System.out.println("[ResourceEventScrambler] Skipped blacklisted resource: " + name);
 					return FileVisitResult.SKIP_SUBTREE;
 				}
@@ -196,7 +272,6 @@ public final class ResourceScrambler {
 		if (failure[0] != null) {
 			throw failure[0];
 		}
-		return scan;
 	}
 
 	private static void consider(Path resources, Path eventsFile, Path file, Scan scan) throws IOException, ScrambleException {
@@ -291,6 +366,13 @@ public final class ResourceScrambler {
 			if (!acceptableName(key)) {
 				return;
 			}
+		}
+		if (scan.reversing) {
+			if (!scan.mapping.containsKey(key)) {
+				return;
+			}
+			edits.put(quoted.start, new Edit(quoted.start, quoted.end, quoted.quote, key, prefix));
+			return;
 		}
 		if (scan.config.isBlacklistedEvent(name) || scan.config.isBlacklistedEvent(key)) {
 			return;
@@ -952,6 +1034,7 @@ public final class ResourceScrambler {
 		final Set<String> watched = new TreeSet<String>();
 		final Set<String> nuiNames = new LinkedHashSet<String>();
 		final Map<String, String> mapping = new LinkedHashMap<String, String>();
+		boolean reversing;
 
 		Scan(ScramblerConfig config) {
 			this.config = config;
