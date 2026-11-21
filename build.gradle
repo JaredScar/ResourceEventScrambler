@@ -4,6 +4,8 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.1.0'
 }
 
+version = '6.0.0'
+
 java {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
@@ -16,6 +18,12 @@ javafx {
 
 application {
     mainClass = 'com.jaredscarito.resourceeventscrambler.main.Main'
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.jaredscarito.resourceeventscrambler.main.Main'
+    }
 }
 
 sourceSets {
@@ -37,6 +45,59 @@ sourceSets {
 
 repositories {
     mavenCentral()
+}
+
+tasks.register('standalone', Exec) {
+    group = 'distribution'
+    description = 'Builds a Windows app image with a bundled Java runtime.'
+    dependsOn tasks.named('jar')
+    def imageDir = layout.buildDirectory.dir('standalone')
+    def inputDir = layout.buildDirectory.dir('standalone-input')
+    def moduleDir = layout.buildDirectory.dir('javafx-modules')
+    doFirst {
+        def input = inputDir.get().asFile
+        def modules = moduleDir.get().asFile
+        delete imageDir.get().asFile, input, modules
+        copy {
+            from tasks.named('jar', Jar).get().archiveFile
+            into input
+        }
+        copy {
+            from configurations.runtimeClasspath
+            include 'javafx-*-win.jar'
+            into modules
+        }
+        if (!modules.listFiles()) {
+            throw new GradleException('No Windows JavaFX modules were found on the runtime classpath.')
+        }
+        def jpackage = new File(System.getProperty('java.home'), 'bin/jpackage.exe')
+        commandLine jpackage.absolutePath,
+                '--type', 'app-image',
+                '--name', 'ResourceEventScrambler',
+                '--app-version', project.version.toString(),
+                '--vendor', 'JaredScar',
+                '--description', 'FiveM event protection',
+                '--dest', imageDir.get().asFile.absolutePath,
+                '--input', input.absolutePath,
+                '--main-jar', tasks.named('jar', Jar).get().archiveFileName.get(),
+                '--main-class', 'com.jaredscarito.resourceeventscrambler.main.Main',
+                '--module-path', modules.absolutePath,
+                '--add-modules', 'javafx.controls'
+    }
+}
+
+tasks.register('standaloneZip', Zip) {
+    group = 'distribution'
+    description = 'Zips the standalone Windows app with RES_Anticheat.'
+    dependsOn tasks.named('standalone')
+    archiveFileName = "ResourceEventScrambler-${project.version}-windows.zip"
+    destinationDirectory = layout.buildDirectory.dir('dist')
+    from(layout.buildDirectory.dir('standalone/ResourceEventScrambler')) {
+        into 'ResourceEventScrambler'
+    }
+    from('RES_Anticheat') {
+        into 'ResourceEventScrambler/RES_Anticheat'
+    }
 }
 
 tasks.register('scrambleSelfTest', JavaExec) {

@@ -9,11 +9,11 @@ ResourceEventScrambler rewrites the event names inside a FiveM `resources` folde
 
 Only the quoted name inside an event call is changed. The tool does not search the rest of the file, so a short name cannot damage a longer one, a comment, or `fxmanifest.lua`.
 
-You need Java 17 or newer (`java -version`). Put this folder in `fx-server-data`, next to `server.cfg` and `resources`, and keep a copy of `resources` somewhere else before the first run.
+The Windows release is a standalone app: unzip it and run `ResourceEventScrambler.exe`. Java is already inside that zip. To run from this source folder instead, you need Java 17 or newer (`java -version`). Put the app next to `server.cfg` and `resources`, and keep a copy of `resources` somewhere else before the first run.
 
 ## 1. Open the window
 
-Double-click `run.bat`, or from this folder run `gradlew.bat run`.
+Unzip the Windows release and run `ResourceEventScrambler.exe`. From this source folder, double-click `run.bat`, or run `gradlew.bat run`.
 
 ![Overview. The sidebar lists Overview, Exclusions, Paths, Event map, and History. The main area says Ready to scramble, with a lime Scramble resources button, the four steps, exclusion chips, path status, and the output console.](docs/images/overview.png)
 
@@ -123,6 +123,8 @@ gradlew.bat run --args="--unscramble resources config RES_Anticheat/events.lua e
 `--cli` scrambles. `--unscramble` restores names from the event map. Leave off the later arguments to use those defaults.
 
 ## Download
+
+**Windows app:** [ResourceEventScrambler 6.0.0](https://github.com/JaredScar/ResourceEventScrambler/releases/tag/6.0.0). Unzip `ResourceEventScrambler-6.0.0-windows.zip` and run `ResourceEventScrambler.exe`. `RES_Anticheat` is in that same folder.
 
 **Source code:** https://github.com/JaredScar/ResourceEventScrambler
 
