@@ -124,7 +124,7 @@ gradlew.bat run --args="--unscramble resources config RES_Anticheat/events.lua e
 
 ## Download
 
-**Windows app:** [ResourceEventScrambler 6.0.0](https://github.com/JaredScar/ResourceEventScrambler/releases/tag/6.0.0). Unzip `ResourceEventScrambler-6.0.0-windows.zip` and run `ResourceEventScrambler.exe`. `RES_Anticheat` is in that same folder.
+**Windows app:** [ResourceEventScrambler 6.0.0](https://github.com/JaredScar/ResourceEventScrambler/releases/tag/6.0.0). `ResourceEventScrambler-6.0.0.exe` installs the window, with Java included. `ResourceEventScrambler-6.0.0.jar` is the command-line tool and needs Java 17 or newer; it does not open the window. The zip is a portable copy of the same app.
 
 **Source code:** https://github.com/JaredScar/ResourceEventScrambler
 
