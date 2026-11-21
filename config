@@ -1,0 +1,70 @@
+#Add More Lines as needed.
+Blacklisted Resources:
+# (These Resources will NOT be modified by the scrambler)
+baseevents
+betaguns
+channelfeed
+chat
+fivem
+fivem-awesome1501
+fivem-map-hipster
+fivem-map-skater
+gameInit
+hardcap
+irc
+keks
+mapmanager
+mysql-async
+obituary
+obituary-deaths
+playernames
+race
+race-test
+rconlog
+RES_Anticheat
+runcode
+scoreboard
+sessionmanager
+spawnmanager
+yarn
+
+Blacklisted Events:
+baseevents:onPlayerDied
+baseevents:onPlayerKilled
+chat:addMessage
+chat:addSuggestion
+chat:addTemplate
+chat:clear
+chat:removeSuggestion
+chatMessage
+entityCreated
+entityCreating
+entityRemoved
+explosionEvent
+getMapDirectives
+onClientGameTypeStart
+onClientGameTypeStop
+onClientMapStart
+onClientMapStop
+onClientResourceStart
+onClientResourceStop
+onPlayerDied
+onPlayerKilled
+onResourceListRefresh
+onResourceStart
+onResourceStarting
+onResourceStop
+playerActivated
+playerConnecting
+playerDropped
+playerEnteredScope
+playerLeftScope
+playerSpawned
+populationPedCreating
+respawnPlayerPedEvent
+sessionInitialized
+vehicleComponentControlEvent
+weaponDamageEvent
+
+Blacklisted Files:
+# These files will not be modified. Use the path relative to the resources folder, without a leading slash.

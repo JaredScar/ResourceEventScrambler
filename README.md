@@ -15,69 +15,59 @@ You need Java 17 or newer (`java -version`). Put this folder in `fx-server-data`
 
 Double-click `run.bat`, or from this folder run `gradlew.bat run`.
 
-![The whole window. Folders and the blacklist are on the left, the log is on the right, and Scramble and Unscramble are at the bottom right.](docs/images/main-window.png)
+![Overview. The sidebar lists Overview, Exclusions, Paths, Event map, and History. The main area says Ready to scramble, with a lime Scramble resources button, the four steps, exclusion chips, path status, and the output console.](docs/images/overview.png)
 
-On a wide screen the window looks like the picture above.
+The sidebar is the same on every page. **Overview** is the home page.
 
-- **Folders**, top left, is where the tool reads and writes.
-- **Blacklist**, bottom left, is the list of resources, events, and files that keep their current names. The **Resources** tab is open in this picture. `chat`, `mysql-async`, and the other default entries are skipped. `RES_Anticheat` is always skipped, even if you remove it from the list.
-- **Output**, on the right, is the log. After a scramble it prints every old name and the new name that replaced it.
-- **Unscramble** and **Scramble** are at the bottom right. Scramble is the green button.
+- **Ready to scramble** is the live resources folder. In the picture that folder is not on disk yet, so the line under the title says to choose it on Paths. Once the folder exists, the same title stays and the body explains what the run will change.
+- **Scramble resources** is the lime button. **Ctrl+L** does the same thing. A clean backup is made first.
+- **Unscramble**, at the top right, puts the original names back.
+- The four steps are backup, rewrite, map, and arm.
+- **Exclusions** on this page is a preview. Chips with an × can be removed here. `RES_Anticheat` is locked. **Manage all** opens the full list.
+- **Paths** shows whether each file is already on disk. **Edit paths** opens the Paths page.
+- **Output** is the log. It stays idle until a run.
 
-On a narrower window the log stacks under the blacklist instead of sitting beside it.
+If the lists are not written yet, or you have edited them, the bottom of the sidebar says **Unsaved changes**. **Save config** or **Ctrl+S** writes them.
 
-## 2. Set the four paths
+## 2. Set the paths
 
-![The Folders card: resources folder, config file, anticheat events file, event map, and the Reload, Save, and Restore defaults buttons.](docs/images/folders.png)
+![Paths. Project root, resources folder, config file, anticheat events, event map, and the clean backup. Each card shows a short path, the full path, and whether the file was found.](docs/images/paths.png)
 
-These four rows default to the folder you launched from. Point them at your server if that folder is somewhere else. **Folder**, **File**, **Save as**, and **Map** open a picker.
+Paths are relative to the project root, which starts as the folder you launched from. **Change root...** picks a different folder and resets the four paths to the defaults under it. **Restore defaults** resets those four paths without changing the root.
 
-| Row | Point it at | What a run does with it |
+| Card | Point it at | What a run does with it |
 | --- | --- | --- |
 | Resources folder | The live `resources` directory | Scramble rewrites files in here. |
-| Config file | The `config` file next to this tool | Holds the blacklist. |
+| Config file | The `config` file next to this tool | Holds the exclusion lists. Saved before every run. |
 | Anticheat events | `RES_Anticheat/events.lua` | Scramble fills this with the original event names. |
 | Event map | `event-map.txt`, beside the resources folder | Scramble writes it. Unscramble reads it. Keep this file. |
 
-**Reload config** reads the config file back into the lists. **Save config** writes the lists to that file. **Restore defaults** loads the built-in blacklist into the window only. Click **Save config** if you want those defaults written to disk.
-
-The status line along the bottom tells you whether the lists came from the file or from the built-in defaults.
+**Found** means the file or folder is already there. **Missing**, **Created on save**, and **Created on run** mean the tool will create it at that step. The clean backup, `resources [UNSCRAMBLED]`, appears beside the resources folder the first time you scramble.
 
 ## 3. Choose what must keep its name
 
-Anything you leave off these lists can be renamed. Add a name in the box at the bottom and click **Add**, or press Enter. Select rows and click **Remove** to take them off.
+![Exclusions. Three counts for resources, events, and files. RES_Anticheat is marked Built-in. The other rows are Default and can be removed.](docs/images/exclusions.png)
 
-### Resources
+Anything not listed here can be renamed. The three cards at the top switch the list. The selected card has a lime border.
 
-The **Resources** tab, visible in the first picture, is whole resource folders. `chat`, `spawnmanager`, `mysql-async`, and the other stock resources are already listed. Add your own when a resource must stay readable, for example a phone or a loading screen you do not want touched.
+- **Resources** are whole folders. `chat`, `spawnmanager`, `mysql-async`, and the other stock resources are already listed. Add one when a resource must stay readable, such as a phone or a loading screen.
+- **Events** are single names that must stay spelled the same way, because FiveM and other resources call them by that exact name. The defaults cover connection, chat, and entity events such as `playerConnecting`, `playerDropped`, `chat:addMessage`, and `entityCreating`.
+- **Files** are single files inside the resources folder, written like `jobs/client.lua` with no leading slash. Leave this list empty when every other file may be rewritten.
 
-### Events
+`RES_Anticheat` is **Built-in**. It stays on the resource list and has no remove button. Other stock names are **Default**. Names you add are **Custom**.
 
-![The Events tab. Names such as playerConnecting, chat:addMessage, and entityCreating stay unchanged.](docs/images/blacklist-events.png)
-
-The **Events** tab is individual event names. These stay spelled the same way in every file, because FiveM and other resources call them by that exact name. The default list covers connection, chat, and entity events such as `playerConnecting`, `playerDropped`, `chat:addMessage`, and `entityCreating`. Add any custom event that outside scripts must still be able to trigger.
-
-### Files
-
-![The Files tab, empty, with Add, Remove, and Add file.](docs/images/blacklist-files.png)
-
-The **Files** tab is single files inside the resources folder. A path looks like `jobs/client.lua`, with no leading slash. **Add file...** only accepts a file from the resources folder you chose above. Leave this list empty when every non-blacklisted file may be rewritten.
-
-The same three lists live in the `config` file. Lines starting with `#` are comments. The section headings are `Blacklisted Resources:`, `Blacklisted Events:`, and `Blacklisted Files:`.
+Type a name and press Enter, or click **Add**. Click × to remove a row. **Restore defaults** loads the built-in lists into the window. **Save config** writes them to the config file. Lines starting with `#` in that file are comments. The section headings are `Blacklisted Resources:`, `Blacklisted Events:`, and `Blacklisted Files:`.
 
 ## 4. Scramble
 
-Click the green **Scramble** button. This dialog appears before anything is written:
+Click **Scramble resources**. A dialog asks you to confirm before anything is written. Read the path in the question. **Cancel** leaves every file alone. **OK** does four things:
 
-![The Scramble confirmation. OK copies resources to resources [UNSCRAMBLED], rewrites the quoted event names, and writes event-map.txt.](docs/images/scramble-confirm.png)
+1. Saves the exclusion lists.
+2. Copies the resources folder to `resources [UNSCRAMBLED]` beside it. That copy is the clean original. If that folder already exists, the scramble stops and nothing is changed, so a second run cannot rename names that are already scrambled.
+3. Rewrites the quoted event names in the live resources folder and writes `event-map.txt`.
+4. Fills `RES_Anticheat/events.lua` with the original names, which is the list the anticheat watches.
 
-Read the path in the question. **Cancel** leaves every file alone. **OK** does three things:
-
-1. Copies the resources folder to `resources [UNSCRAMBLED]` beside it. That copy is the clean original. If that folder already exists, the scramble stops and nothing is changed, so a second run cannot rename names that are already scrambled.
-2. Rewrites the quoted event names in the live resources folder and writes `event-map.txt`.
-3. Fills `RES_Anticheat/events.lua` with the original names, which is the list the anticheat watches.
-
-The log then prints lines like `'esx:getData' -> 'AbCdEfGhIjKl'`. When it finishes, copy `RES_Anticheat` into the scrambled `resources` folder and start it from `server.cfg`:
+The output console prints lines like `'esx:getData' -> 'AbCdEfGhIjKl'`. The run is also recorded on the History page. When it finishes, copy `RES_Anticheat` into the scrambled `resources` folder and start it from `server.cfg`:
 
 ```
 ensure RES_Anticheat
@@ -87,7 +77,15 @@ In `RES_Anticheat/config.lua`, `Ban = true` stores the player and refuses a late
 
 A ban matches any saved identifier: `license`, `license2`, `steam`, `discord`, or `ip`. `banlist.json` stays on the server. It is not shipped to clients.
 
-## 5. Unscramble, or add a resource later
+## 5. Check the map, then unscramble
+
+![Event map, empty. The counts are zero and the page says no event map has been written yet.](docs/images/event-map.png)
+
+**Event map** lists every old name and the new name that replaced it. Before the first scramble the page is empty, as in the picture. After a run it fills from `event-map.txt`. Search filters the rows, and **Events** / **NUI** split server and client events from NUI callbacks. **Open file** and **Copy all** use that same file. Keep it. Without it, scrambled names cannot be restored from the map.
+
+![History, empty. Filters for all runs, scrambles, unscrambles, and failed runs, with a note that nothing has been run yet.](docs/images/history.png)
+
+**History** is every scramble and unscramble started from this window. A finished run shows when it happened, whether it completed, and how many names and files changed. **Clear history** deletes that list. It does not restore any files.
 
 **Unscramble** puts the original quoted names back, using `event-map.txt`. When files change, it clears the anticheat event list so those restored names are not banned. The `resources [UNSCRAMBLED]` folder stays where it is.
 
